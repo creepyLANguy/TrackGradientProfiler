@@ -9,7 +9,7 @@ using namespace std;
 
 const int whiteThreshold = 200;
 
-string kSourceName = "img.bmp";
+string sourceName = "img.bmp";
 const string kOutputName = "gradient";
 
 const int tickCount = GetTickCount64();
@@ -51,7 +51,7 @@ void PaintGradientToCanvas(Mat* canvas, vector<int>& list)
 void ShowError()
 {
   wstring msg = L"Could not find : ";
-  msg += wstring(kSourceName.begin(), kSourceName.end());
+  msg += wstring(sourceName.begin(), sourceName.end());
 
   MessageBox(
     nullptr,
@@ -65,10 +65,10 @@ int main(const int argc, char* argv[])
 {
   if (argc > 1)
   {
-    kSourceName = argv[1];
+    sourceName = argv[1];
   }
 
-  const Mat profile = imread(kSourceName, CV_LOAD_IMAGE_GRAYSCALE);
+  const Mat profile = imread(sourceName, CV_LOAD_IMAGE_GRAYSCALE);
 
   if (profile.data == nullptr)
   {
