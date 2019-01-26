@@ -9,9 +9,10 @@ using namespace std;
 
 const int whiteThreshold = 200;
 
-const string kSourceName = "img.bmp";
+string kSourceName = "img.bmp";
 const string kOutputName = "gradient";
 
+const int tickCount = GetTickCount64();
 
 void GetGradientValues(const Mat& profile, vector<int>& list)
 {
@@ -60,14 +61,19 @@ void ShowError()
   );
 }
 
-void main()
+int main(const int argc, char* argv[])
 {
+  if (argc > 1)
+  {
+    kSourceName = argv[1];
+  }
+
   const Mat profile = imread(kSourceName, CV_LOAD_IMAGE_GRAYSCALE);
 
   if (profile.data == nullptr)
   {
     ShowError();
-    return;
+    return -1;
   }
 
   vector<int> list;
@@ -76,7 +82,7 @@ void main()
   Mat* canvas = new Mat(profile.rows, profile.cols, CV_LOAD_IMAGE_GRAYSCALE);
   PaintGradientToCanvas(canvas, list);
 
-  const string tickString = to_string(GetTickCount64());
+  const string tickString = to_string(tickCount);
 
   CreateDirectoryA(tickString.c_str(), nullptr);
 
@@ -89,4 +95,6 @@ void main()
   {
     outFile << e << "\n";
   }
+
+  return tickCount;
 }
