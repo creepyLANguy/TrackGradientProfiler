@@ -1,11 +1,13 @@
 #define WIN32_LEAN_AND_MEAN
 
-#include <opencv2/highgui/highgui.hpp>
 #include "Windows.h"
 #include <fstream>
 #include <iostream>
+#include <vector>
+#include <string>
 
-using namespace cv;
+#include "bmp/EasyBMP.h"
+
 using namespace std;
 
 const int whiteThreshold = 200;
@@ -15,16 +17,16 @@ const string kOutputName = "gradient";
 
 const int tickCount = GetTickCount64();
 
-void GetGradientValues(const Mat& profile, vector<int>& list)
+void GetGradientValues(BMP& profile, vector<int>& list)
 {
-  for (int x = 0; x < profile.cols; ++x)
+  for (int x = 0; x < profile.TellWidth(); ++x)
   {
     int depth = 0;
 
-    for (int y = 0; y < profile.rows; ++y)
+    for (int y = 0; y < profile.TellHeight(); ++y)
     {
-      const uchar px = profile.at<uchar>(y, x);
-      if (px < whiteThreshold)
+      const RGBApixel p = profile.GetPixel(x, y);
+      if (((p.Red+p.Blue+p.Green) / 3) < whiteThreshold)
       {
         break;
       }
@@ -32,19 +34,19 @@ void GetGradientValues(const Mat& profile, vector<int>& list)
       ++depth;
     }
 
-    const float gradientVal = (1-(static_cast<float>(depth) / profile.rows)) * 255;
+    const float gradientVal = (1-(static_cast<float>(depth) / profile.TellHeight())) * 255;
     list.push_back(gradientVal);
   }
 }
 
-void PaintGradientToCanvas(Mat* canvas, vector<int>& list)
+void PaintGradientToCanvas(BMP& canvas, vector<int>& list)
 {
-  for (int x = 0; x < canvas->cols; ++x)
+  for (int x = 0; x < canvas.TellWidth(); ++x)
   {
-    const int val = list.at(x);
-    for (int y = 0; y < canvas->rows; ++y)
+    const RGBApixel p = { list.at(x), list.at(x), list.at(x), 0 };
+    for (int y = 0; y < canvas.TellHeight(); ++y)
     {
-      canvas->at<uchar>(y, x) = val;
+      canvas.SetPixel(x, y, p);
     }
   }
 }
@@ -81,9 +83,8 @@ int main(const int argc, char* argv[])
     sourceName = argv[1];
   }
 
-  const Mat profile = imread(sourceName, CV_LOAD_IMAGE_GRAYSCALE);
-
-  if (profile.data == nullptr)
+  BMP profile;
+  if (profile.ReadFromFile(sourceName.c_str()) == false)
   {
     ShowError();
     return -1;
@@ -92,7 +93,8 @@ int main(const int argc, char* argv[])
   vector<int> list;
   GetGradientValues(profile, list);
 
-  Mat* canvas = new Mat(profile.rows, profile.cols, CV_LOAD_IMAGE_GRAYSCALE);
+  BMP canvas;
+  canvas.SetSize(profile.TellWidth(), profile.TellHeight());
   PaintGradientToCanvas(canvas, list);
 
   const string tickString = to_string(tickCount);
@@ -100,7 +102,7 @@ int main(const int argc, char* argv[])
   CreateDirectoryA(tickString.c_str(), nullptr);
 
   const string outputName_image = tickString + "/" + kOutputName + ".bmp";
-  imwrite(outputName_image, *canvas);
+  canvas.WriteToFile(outputName_image.c_str());
 
   const string outputName_text = tickString + "/" + kOutputName + ".txt";
   ofstream outFile(outputName_text);
