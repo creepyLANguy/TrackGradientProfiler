@@ -3,6 +3,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include "Windows.h"
 #include <fstream>
+#include <iostream>
 
 using namespace cv;
 using namespace std;
@@ -63,6 +64,18 @@ void ShowError()
 
 int main(const int argc, char* argv[])
 {
+  //AL.
+  //For debugging!
+  #ifdef _DEBUG
+  MessageBox(nullptr, L"Attach", L"", 0);
+  #endif
+  for (int i = 0; i < argc; ++i)
+  {
+    cout << argv[i] << "\n";
+  }
+  cout << "\nCreating Gradient Reference...";
+  //
+
   if (argc > 1)
   {
     sourceName = argv[1];
