@@ -15,8 +15,6 @@ const int whiteThreshold = 200;
 string sourceName = "img.bmp";
 const string kOutputName = "gradient";
 
-const int tickCount = GetTickCount64();
-
 void GetGradientValues(BMP& profile, vector<int>& list)
 {
   for (int x = 0; x < profile.TellWidth(); ++x)
@@ -97,6 +95,7 @@ int main(const int argc, char* argv[])
   canvas.SetSize(profile.TellWidth(), profile.TellHeight());
   PaintGradientToCanvas(canvas, list);
 
+  const int tickCount = abs(static_cast<int>(GetTickCount()));
   const string tickString = to_string(tickCount);
 
   CreateDirectoryA(tickString.c_str(), nullptr);
